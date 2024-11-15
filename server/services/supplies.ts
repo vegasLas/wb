@@ -104,9 +104,6 @@ export class SuppliesService {
 
   async createTrigger(userId: number, data: CreateTriggerRequest) {
     const start = Math.min(Math.max(data.checkPeriodStart, 0), 14);
-    const end = data.checkPeriodEnd 
-      ? Math.min(Math.max(data.checkPeriodEnd, start), 14)
-      : start;  // If no end provided, use same as start for single day
 
     return await prisma.supplyTrigger.create({
       data: {
@@ -115,7 +112,6 @@ export class SuppliesService {
         boxTypes: data.boxTypes,
         coefficientThreshold: data.coefficientThreshold,
         checkPeriodStart: start,
-        checkPeriodEnd: end,
       },
     }) as SupplyTrigger;
   }
@@ -133,16 +129,9 @@ export class SuppliesService {
     }
 
     let start = trigger.checkPeriodStart;
-    let end = trigger.checkPeriodEnd;
 
     if (data.checkPeriodStart !== undefined) {
       start = Math.min(Math.max(data.checkPeriodStart, 0), 14);
-      // If start changes, ensure end is not less than start
-      end = Math.max(end, start);
-    }
-
-    if (data.checkPeriodEnd !== undefined) {
-      end = Math.min(Math.max(data.checkPeriodEnd, start), 14);
     }
 
     return await prisma.supplyTrigger.update({
@@ -153,7 +142,6 @@ export class SuppliesService {
         coefficientThreshold: data.coefficientThreshold,
         isActive: data.isActive,
         checkPeriodStart: start,
-        checkPeriodEnd: end,
       },
     }) as SupplyTrigger;
   }
@@ -180,31 +168,5 @@ export class SuppliesService {
       where: { userId },
       orderBy: { createdAt: 'desc' },
     }) as SupplyTrigger[];
-  }
-
-  async checkTriggers(userId: number): Promise<void> {
-    const triggers = await this.getUserTriggers(userId);
-    const now = new Date();
-
-    for (const trigger of triggers) {
-      if (!trigger.isActive) continue;
-
-      const coefficients = await this.getCoefficients(trigger.warehouseIds.join(','));
-      
-      for (const coef of coefficients) {
-        const coefDate = new Date(coef.date);
-        const daysDiff = Math.floor((now.getTime() - coefDate.getTime()) / (1000 * 60 * 60 * 24));
-        
-        if (
-          daysDiff >= trigger.checkPeriodStart && 
-          daysDiff <= trigger.checkPeriodEnd &&
-          trigger.boxTypes.includes(coef.boxTypeName) &&
-          coef.coefficient! <= trigger.coefficientThreshold!
-        ) {
-          // TODO: Implement notification logic here
-          console.log(`Trigger ${trigger.id} activated for warehouse ${coef.warehouseID}`);
-        }
-      }
-    }
   }
 } 

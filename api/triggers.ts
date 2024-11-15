@@ -25,8 +25,8 @@ export async function updateTrigger(data: UpdateTriggerRequest): Promise<SupplyT
   })
 }
 
-export async function getTriggers(): Promise<SupplyTrigger[]> {
-  return await $fetch<SupplyTrigger[]>('/api/v1/triggers', {
+export async function getTriggers() {
+  return await useFetch<SupplyTrigger[]>('/api/v1/triggers', {
     method: 'GET',
     headers: {
       'x-init-data': useWebApp().initData,
