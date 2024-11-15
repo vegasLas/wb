@@ -6,17 +6,15 @@ export interface SupplyTrigger {
   coefficientThreshold: number | null
   isActive: boolean
   checkPeriodStart: number  // start of range (0-14)
-  checkPeriodEnd: number    // end of range (0-14)
   createdAt: Date
   updatedAt: Date
 }
 
 export interface CreateTriggerRequest {
   warehouseIds: number[]
-  boxTypes: ('Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами')[]
+  boxTypes: ("Короба" | "Суперсейф" | "Монопаллеты" | "QR-поставка с коробами")[]
   coefficientThreshold: number | null
-  checkPeriodStart: number  // start of range (0-14)
-  checkPeriodEnd?: number   // optional end of range (0-14)
+  checkPeriodStart: number
 }
 export interface UpdateTriggerRequest {
   triggerId: string
@@ -25,7 +23,6 @@ export interface UpdateTriggerRequest {
   coefficientThreshold?: number | null
   isActive?: boolean
   checkPeriodStart?: number
-  checkPeriodEnd?: number
 }
 export interface CreateTriggerResponse {
   triggerId: string
@@ -34,5 +31,4 @@ export interface CreateTriggerResponse {
   coefficientThreshold?: number | null
   isActive?: boolean
   checkPeriodStart?: number
-  checkPeriodEnd?: number
 }

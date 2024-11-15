@@ -1,5 +1,3 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 import { 
   createTrigger as apiCreateTrigger,
   updateTrigger as apiUpdateTrigger,
@@ -17,7 +15,7 @@ export const useTriggerStore = defineStore('triggers', () => {
   const triggers = ref<SupplyTrigger[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
-
+  const deletingId = ref<string | null>(null)
   // getters
   const getTriggerById = computed(() => {
     return (triggerId: string) => triggers.value.find(t => t.id === triggerId)
@@ -65,8 +63,8 @@ export const useTriggerStore = defineStore('triggers', () => {
     try {
       loading.value = true
       const response = await apiGetTriggers()
-      if (response) {
-        triggers.value = response
+      if (response.data.value) {
+        triggers.value = response.data.value
       }
       return response
     } catch (err) {
@@ -79,6 +77,15 @@ export const useTriggerStore = defineStore('triggers', () => {
 
   async function deleteTrigger(triggerId: string) {
     try {
+      deletingId.value = triggerId
+      const doActionResult = await doAction({
+        title: 'Удалить триггер',
+        message: 'Хотите удалить триггер?',
+        buttonText: 'Удалить',
+      })
+      if (!doActionResult) {
+        return
+      }
       loading.value = true
       await apiDeleteTrigger(triggerId)
       // Remove the trigger from the state
@@ -88,6 +95,7 @@ export const useTriggerStore = defineStore('triggers', () => {
       throw err
     } finally {
       loading.value = false
+      deletingId.value = null
     }
   }
 
@@ -95,6 +103,7 @@ export const useTriggerStore = defineStore('triggers', () => {
     // state
     triggers,
     loading,
+    deletingId,
     error,
     // getters
     getTriggerById,
