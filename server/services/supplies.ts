@@ -199,7 +199,7 @@ export class SuppliesService {
           daysDiff >= trigger.checkPeriodStart && 
           daysDiff <= trigger.checkPeriodEnd &&
           trigger.boxTypes.includes(coef.boxTypeName) &&
-          coef.coefficient <= trigger.coefficientThreshold
+          coef.coefficient! <= trigger.coefficientThreshold!
         ) {
           // TODO: Implement notification logic here
           console.log(`Trigger ${trigger.id} activated for warehouse ${coef.warehouseID}`);

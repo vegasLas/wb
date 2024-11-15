@@ -10,10 +10,7 @@ export default defineEventHandler(async (event) => {
     const suppliesService = await getSuppliesService(event);
     const triggers = await suppliesService.getUserTriggers(user.id);
 
-    return {
-      triggers,
-      requestId: event.context.requestId,
-    };
+    return triggers
   } catch (error: any) {
     throw createError({
       statusCode: 400,

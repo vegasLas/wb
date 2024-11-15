@@ -15,7 +15,6 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      requestId: event.context.requestId,
     };
   } catch (error: any) {
     throw createError({
