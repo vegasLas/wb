@@ -1,6 +1,6 @@
 export interface AcceptanceCoefficient {
   date: string
-  coefficient: number
+  coefficient: number | null
   warehouseID: number
   warehouseName: string
   boxTypeName: 'Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами'
@@ -55,7 +55,7 @@ export interface SupplyTrigger {
   userId: number
   warehouseIds: number[]
   boxTypes: ('Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами')[]
-  coefficientThreshold: number
+  coefficientThreshold: number | null
   isActive: boolean
   checkPeriodStart: number  // start of range (0-14)
   checkPeriodEnd: number    // end of range (0-14)
@@ -66,7 +66,7 @@ export interface SupplyTrigger {
 export interface CreateTriggerRequest {
   warehouseIds: number[]
   boxTypes: ('Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами')[]
-  coefficientThreshold: number
+  coefficientThreshold: number | null
   checkPeriodStart: number  // start of range (0-14)
   checkPeriodEnd?: number   // optional end of range (0-14)
 }
@@ -75,7 +75,7 @@ export interface UpdateTriggerRequest {
   triggerId: string
   warehouseIds?: number[]
   boxTypes?: ('Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами')[]
-  coefficientThreshold?: number
+  coefficientThreshold?: number | null
   isActive?: boolean
   checkPeriodStart?: number
   checkPeriodEnd?: number

@@ -1,67 +1,51 @@
-import TelegramBot from 'node-telegram-bot-api'
 import prisma from '../services/prisma'
 
-export default defineNitroPlugin((nitroApp) => {
-  const token = process.env.TELEGRAM_BOT_TOKEN
-  
-  if (!token) {
-    console.error('TELEGRAM_BOT_TOKEN is not defined in environment variables')
-    return
-  }
 
-  const bot = new TelegramBot(token, { polling: true })
+export default defineNitroPlugin(async (event) => {
+	TBOT.onText(/\/start/, async (msg) => {
+		if (!msg.from || msg.from?.is_bot) return
+		try {
+			const currentChatId = String(msg.chat.id);
+			// Check if user exists
+			const existingUser = await prisma.user.findUnique({
+				where: {
+					telegramId: msg.from.id
+				}
+				// If user doesn't exist, create new user
+				// If user doesn't exist, create new user
+			});
 
-  bot.onText(/\/start/, async (msg) => {
-    const chatId = msg.chat.id
-    const userId = msg.from?.id
+			if (existingUser) {
+				// Update chat ID if it's different
+				if (existingUser.chatId !== currentChatId) {
+					await prisma.user.update({
+						where: {
+							telegramId: msg.from.id
+						},
+						data: {
+							chatId: currentChatId
+						}
+					});
+				}
+			} else {
+				// Create new user if doesn't exist
+				await prisma.user.create({
+					data: {
+						telegramId: msg.from.id,
+						username: msg.from.username,
+						languageCode: msg.from.language_code,
+						chatId: currentChatId,
+						name: msg.from.first_name + ' ' + msg.from.last_name,
+					},
+				});
+			}
 
-    if (!userId) {
-      await bot.sendMessage(chatId, 'Could not identify user')
-      return
-    }
+			// Send welcome message with instructions and an icon
+			await TBOT.sendMessage(currentChatId, '✨ Нажмите кнопку "настройка", чтобы настроить ваши триггеры ✨');
 
-    try {
-      // Check if user exists
-      const existingUser = await prisma.user.findUnique({
-        where: { telegramId: BigInt(userId) }
-      })
-
-      if (existingUser) {
-        await bot.sendMessage(chatId, `Welcome back, ${existingUser.name}!`)
-        return
-      }
-
-      // Create new user
-      const newUser = await prisma.user.create({
-        data: {
-          telegramId: BigInt(userId),
-          chatId: String(chatId),
-          username: msg.from?.username ?? null,
-          languageCode: msg.from?.language_code ?? null,
-          name: msg.from?.first_name || 'Unknown User'
-        }
-      })
-
-      await bot.sendMessage(
-        chatId,
-        `Hello ${newUser.name}! Thanks for starting the bot.`
-      )
-    } catch (error) {
-      console.error('Error handling /start command:', error)
-      await bot.sendMessage(
-        chatId,
-        'Sorry, there was an error processing your request.'
-      )
-    }
-  })
-
-  // Handle errors
-  bot.on('error', (error) => {
-    console.error('Telegram bot error:', error)
-  })
-
-  // Cleanup on app close
-  nitroApp.hooks.hook('close', () => {
-    bot.stopPolling()
-  })
-}) 
+		} catch (error: any) {
+			console.error('Error handling user', error)
+		}
+	});
+	
+})

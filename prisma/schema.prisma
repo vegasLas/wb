@@ -24,7 +24,7 @@ model SupplyTrigger {
   user                User     @relation(fields: [userId], references: [id])
   warehouseIds        Int[]
   boxTypes            String[]
-  coefficientThreshold Float
+  coefficientThreshold Float?
   isActive            Boolean  @default(true)
   checkPeriodStart    Int
   checkPeriodEnd      Int
