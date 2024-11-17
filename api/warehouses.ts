@@ -1,11 +1,11 @@
 import type { Warehouse } from "~/types/warehouses";
-import { useWebApp } from 'vue-tg'
 
 export async function getWarehouses() {
+  const initData = (await import('vue-tg')).useWebApp().initData
   return await useFetch<Warehouse[]>('/api/v1/warehouses', {
     method: 'GET',
     headers: {
-      'x-init-data': useWebApp().initData,
+      'x-init-data': initData,
     },
   })
 }

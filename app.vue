@@ -1,6 +1,8 @@
 <template>
   <div class="app-container">
-    <TriggersMain />
+    <ClientOnly>
+      <TriggersMain />
+    </ClientOnly>
   </div>
 </template>
 

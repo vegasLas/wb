@@ -1,11 +1,10 @@
-import { useWebAppPopup } from 'vue-tg'
-
-
 export const doAction = async (options: {
 	title: string
 	message: string
   buttonText: string
 }) => {
+  const useWebAppPopup = (await import('vue-tg')).useWebAppPopup
+
   return new Promise((resolve) => {
     const { showPopup, onPopupClosed } = useWebAppPopup()
     
