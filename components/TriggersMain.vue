@@ -3,28 +3,41 @@
     <div class="triggers-header">
       <div class="triggers-stats">
         <span class="triggers-count">{{ triggerStore.triggers.length }}</span>
-        <span class="triggers-label">Триггеры</span>
+        <span class="triggers-label">триггеров</span>
       </div>
       
-      <UButton
-	  	@click="step = 'form'"
-        icon="i-heroicons-plus"
-        size="sm"
-        color="primary"
-      >
-        Создать триггер
-      </UButton>
+      <div class="button-column">
+        <UButton
+          @click="step = 'form'"
+          icon="i-heroicons-plus"
+          size="sm"
+          color="primary"
+          trailing
+        >
+          Создать триггер
+        </UButton>
+        <UButton
+          @click="step = 'api-key'"
+          icon="i-heroicons-key"
+          trailing
+          size="sm"
+          color="primary"
+        >
+          API ключ
+        </UButton>
+      </div>
     </div>
 
     <TriggersList />
   </div>
-  <TriggerForm v-else @back="step = 'list'" />
+  <TriggerForm v-else-if="step === 'form'" @back="step = 'list'" />
+  <ApiKeyForm v-else-if="step === 'api-key'" @back="step = 'list'" />
 </template>
 
 <script setup lang="ts">
 const triggerStore = useTriggerStore()
 triggerStore.fetchTriggers()
-const step = ref<'list' | 'form'>('list')
+const step = ref<'list' | 'form' | 'api-key'>('list')
 </script>
 
 <style scoped>
@@ -44,7 +57,11 @@ const step = ref<'list' | 'form'>('list')
   align-items: baseline;
   gap: 0.5rem;
 }
-
+.button-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
 .triggers-count {
   font-size: 1.5rem;
   font-weight: 600;

@@ -11,11 +11,10 @@
         name="warehouseIds"
         required
       >
-        <USelect
-          v-model="form.warehouseIds"
+        <MultiSelect
+          v-model="selectedWarehouses"
           :options="warehouseOptions"
-          multiple
-          placeholder="Выберите склады"
+          placeholder="Select warehouses"
         />
       </UFormGroup>
 
@@ -24,11 +23,10 @@
         name="boxTypes"
         required
       >
-        <USelect
-          v-model="form.boxTypes"
-          :options="boxTypeOptions"
-          multiple
-          placeholder="Выберите типы коробов"
+        <MultiSelect
+          v-model="selectedProducts"
+          :options="productOptions"
+          placeholder="Select products"
         />
       </UFormGroup>
 
@@ -77,7 +75,8 @@
 <script setup lang="ts">
 import type { CreateTriggerRequest } from '~/types/triggers'
 import { BackButton, MainButton } from "vue-tg";
-import yup from 'yup'
+import * as yup from 'yup'
+import MultiSelect from '~/components/MultiSelect.vue'
 
 const triggerStore = useTriggerStore()
 const warehouseStore = useWarehouses()
@@ -98,17 +97,19 @@ onMounted(async () => {
   }
 })
 
-const boxTypeOptions = [
-  { label: 'Короба', value: 'Короба' },
-  { label: 'Суперсейф', value: 'Суперсейф' },
-  { label: 'Монопаллеты', value: 'Монопаллеты' },
-  { label: 'QR-поставка с коробами', value: 'QR-поставка с коробами' },
-]
+const boxTypeOptions = ['Короба','Суперсейф','Монопаллеты','QR-поставка с коробами']
 
 const warehouseOptions = computed(() => {
   return warehouseStore.warehouses.map(warehouse => ({
-    label: warehouse.name,
-    value: warehouse.ID,
+    id: warehouse.ID,
+    name: warehouse.name
+  }))
+})
+
+const productOptions = computed(() => {
+  return products.value.map(product => ({
+    label: product.name,
+    value: product.id
   }))
 })
 
@@ -141,7 +142,7 @@ const schema = computed(() => {
         is: true,
         then: (schema) => schema
           .required('Введите пороговый коэффициент')
-          .min(0, 'Коэффициент не может быть отрицательн��м'),
+          .min(0, 'Коэффициент не может быть отрицательнм'),
         otherwise: (schema) => schema.notRequired(),
       }),
     
@@ -166,4 +167,16 @@ watch(useCoefficient, (newValue) => {
 const validationContext = computed(() => ({
   useCoefficient: useCoefficient.value
 }))
+
+const selectedWarehouses = ref([])
+const selectedProducts = ref([])
+
+const handleSubmit = () => {
+  const formData = {
+    // ... other form fields
+    warehouseIds: selectedWarehouses.value.map(w => w.value),
+    productIds: selectedProducts.value.map(p => p.value),
+  }
+  // ... rest of submit logic
+}
 </script> 
