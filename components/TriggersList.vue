@@ -5,7 +5,7 @@
         <div class="space-y-2">
           <!-- Warehouses -->
           <div>
-            <div class="font-medium text-gray-700">Склады:</div>
+            <div class="font-medium">Склады:</div>
             <div class="flex flex-wrap gap-1">
               <UBadge
                 v-for="warehouseId in trigger.warehouseIds"
@@ -20,13 +20,13 @@
 
           <!-- Box Types -->
           <div>
-            <div class="font-medium text-gray-700">Типы коробов:</div>
+            <div class="font-medium">Типы коробов:</div>
             <div class="flex flex-wrap gap-1">
               <UBadge
                 size="sm"
                 v-for="boxType in trigger.boxTypes"
                 :key="boxType"
-                color="blue"
+                color="gray"
               >
                 {{ boxType }}
               </UBadge>
@@ -35,18 +35,18 @@
 
           <!-- Coefficient -->
           <div>
-            <span class="font-medium text-gray-700">Коэффициент: </span>
-            <span>{{ trigger.coefficientThreshold ?? 'Не задан' }}</span>
+            <span class="font-medium">Коэффициент: </span>
+            <span>{{ trigger.coefficientThreshold || 'Не задан' }}</span>
           </div>
 
           <!-- Check Period -->
           <div>
-            <span class="font-medium text-gray-700">Период проверки: </span>
-            <span>{{ trigger.checkPeriodStart }} дней</span>
+            <span class="font-medium">Отступ в днях: </span>
+            <span>{{ trigger.checkPeriodStart }}</span>
           </div>
 
           <!-- Created Date -->
-          <div class="text-sm text-gray-500">
+          <div class="text-sm">
             Создан: {{ formatDate(trigger.createdAt) }}
           </div>
         </div>
@@ -63,7 +63,7 @@
       </div>
     </UCard>
 
-    <div v-if="triggerStore.triggers.length === 0" class="text-center text-gray-500 py-8">
+    <div v-if="triggerStore.triggers.length === 0" class="text-center py-8">
       Триггеры не созданы
     </div>
   </div>
