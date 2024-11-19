@@ -30,8 +30,9 @@ export const useTriggerStore = defineStore('triggers', () => {
       loading.value = true
       const trigger = await apiCreateTrigger(data)
       if (trigger) {
-        triggers.value.push(trigger)
+        triggers.value.unshift(trigger)
       }
+      useSteps().setStep('list')
       return trigger
     } catch (err) {
       error.value = 'Failed to create trigger'

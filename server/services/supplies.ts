@@ -103,15 +103,13 @@ export class SuppliesService {
   }
 
   async createTrigger(userId: number, data: CreateTriggerRequest) {
-    const start = Math.min(Math.max(data.checkPeriodStart, 0), 14);
-
     return await prisma.supplyTrigger.create({
       data: {
         userId,
         warehouseIds: data.warehouseIds,
         boxTypes: data.boxTypes,
         coefficientThreshold: data.coefficientThreshold,
-        checkPeriodStart: start,
+        checkPeriodStart: data.checkPeriodStart ? Math.min(Math.max(data.checkPeriodStart, 0), 14) : null,
       },
     }) as SupplyTrigger;
   }

@@ -66,7 +66,7 @@ export interface CreateTriggerRequest {
   warehouseIds: number[]
   boxTypes: ('Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами')[]
   coefficientThreshold: number | null
-  checkPeriodStart: number  // start of range (0-14)
+  checkPeriodStart: number | null  // start of range (0-14)
 }
 
 export interface UpdateTriggerRequest {
