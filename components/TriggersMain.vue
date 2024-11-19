@@ -8,7 +8,7 @@
       
       <div class="button-column">
         <UButton
-          @click="step = 'form'"
+          @click="stepsStore.setStep('form')"
           icon="i-heroicons-plus"
           size="sm"
           color="primary"
@@ -17,7 +17,7 @@
           Создать триггер
         </UButton>
         <UButton
-          @click="step = 'api-key'"
+          @click="stepsStore.setStep('api-key')"
           icon="i-heroicons-key"
           trailing
           size="sm"
@@ -30,14 +30,16 @@
 
     <TriggersList />
   </div>
-  <TriggerForm v-else-if="step === 'form'" @back="step = 'list'" />
-  <ApiKeyForm v-else-if="step === 'api-key'" @back="step = 'list'" />
+  <TriggerForm v-else-if="step === 'form'" @back="stepsStore.setStep('list')" />
+  <ApiKeyForm v-else-if="step === 'api-key'" @back="stepsStore.setStep('list')" />
 </template>
 
 <script setup lang="ts">
 const triggerStore = useTriggerStore()
+const stepsStore = useSteps()
+const { step } = storeToRefs(stepsStore)
+
 triggerStore.fetchTriggers()
-const step = ref<'list' | 'form' | 'api-key'>('list')
 </script>
 
 <style scoped>

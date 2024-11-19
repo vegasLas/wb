@@ -26,7 +26,7 @@ model SupplyTrigger {
   boxTypes            String[]
   coefficientThreshold Float?
   isActive            Boolean  @default(true)
-  checkPeriodStart    Int
+  checkPeriodStart    Int?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 

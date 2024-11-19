@@ -10,8 +10,8 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
   const form = ref<CreateTriggerRequest>({
     warehouseIds: [],
     boxTypes: [],
-    coefficientThreshold: 0,
-    checkPeriodStart: 0,
+    coefficientThreshold: null,
+    checkPeriodStart: null
   })
 
   const boxTypeOptions = [
@@ -90,13 +90,19 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
 
   watch(useCoefficient, (newValue) => {
     if (!newValue) {
-      form.value.coefficientThreshold = 1
+      form.value.coefficientThreshold = 0
+    }
+    else {
+      form.value.coefficientThreshold = null
     }
   })
 
   watch(useCheckPeriod, (newValue) => {
     if (!newValue) {
-      form.value.checkPeriodStart = 1
+      form.value.checkPeriodStart = 0
+    }
+    else {
+      form.value.checkPeriodStart = null
     }
   })
 

@@ -14,7 +14,7 @@ export interface CreateTriggerRequest {
   warehouseIds: number[]
   boxTypes: ("Короба" | "Суперсейф" | "Монопаллеты" | "QR-поставка с коробами")[]
   coefficientThreshold: number | null
-  checkPeriodStart: number
+  checkPeriodStart: number | null
 }
 export interface UpdateTriggerRequest {
   triggerId: string
