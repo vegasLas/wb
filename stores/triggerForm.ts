@@ -4,13 +4,12 @@ import type { CreateTriggerRequest } from '~/types/triggers'
 
 export const useTriggerFormStore = defineStore('triggerForm', () => {
   const warehouseStore = useWarehouses()
-  const useCoefficient = ref(false)
   const useCheckPeriod = ref(false)
   
   const form = ref<CreateTriggerRequest>({
     warehouseIds: [],
     boxTypes: [],
-    coefficientThreshold: null,
+    isFree: false,
     checkPeriodStart: null
   })
 
@@ -42,17 +41,7 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
         .min(1, 'Выберите хотя бы один тип короба')
         .required('Выберите хотя бы один тип короба'),
       
-      coefficientThreshold: yup
-        .number()
-        .nullable()
-        .transform(value => (isNaN(value) ? undefined : value))
-        .when('$useCoefficient', {
-          is: true,
-          then: (schema) => schema
-            .required('Введите пороговый коэффициент')
-            .min(0, 'Коэффициент не может быть отрицательнм'),
-          otherwise: (schema) => schema.notRequired(),
-        }),
+      isFree: yup.boolean(),
       
       checkPeriodStart: yup
         .number()
@@ -69,7 +58,6 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
   })
 
   const validationContext = computed(() => ({
-    useCoefficient: useCoefficient.value,
     useCheckPeriod: useCheckPeriod.value
   }))
 
@@ -88,23 +76,15 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
     }
   })
 
-  watch(useCoefficient, (newValue) => {
-    if (!newValue) {
-      form.value.coefficientThreshold = 0
+  function resetForm() {
+    form.value = {
+      warehouseIds: [],
+      boxTypes: [],
+      isFree: true,
+      checkPeriodStart: 0,
     }
-    else {
-      form.value.coefficientThreshold = null
-    }
-  })
-
-  watch(useCheckPeriod, (newValue) => {
-    if (!newValue) {
-      form.value.checkPeriodStart = 0
-    }
-    else {
-      form.value.checkPeriodStart = null
-    }
-  })
+    useCheckPeriod.value = false
+  }
 
   async function initializeWarehouses() {
     if (warehouseStore.warehouses.length === 0) {
@@ -112,20 +92,8 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
     }
   }
 
-  function resetForm() {
-    form.value = {
-      warehouseIds: [],
-      boxTypes: [],
-      coefficientThreshold: 0,
-      checkPeriodStart: 0,
-    }
-    useCoefficient.value = false
-    useCheckPeriod.value = false
-  }
-
   return {
     form,
-    useCoefficient,
     useCheckPeriod,
     boxTypeOptions,
     warehouseOptions,

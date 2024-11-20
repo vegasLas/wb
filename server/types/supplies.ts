@@ -55,7 +55,7 @@ export interface SupplyTrigger {
   userId: number
   warehouseIds: number[]
   boxTypes: ('Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами')[]
-  coefficientThreshold: number | null
+  isFree: boolean
   isActive: boolean
   checkPeriodStart: number  // start of range (0-14)
   createdAt: Date
@@ -65,15 +65,15 @@ export interface SupplyTrigger {
 export interface CreateTriggerRequest {
   warehouseIds: number[]
   boxTypes: ('Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами')[]
-  coefficientThreshold: number | null
-  checkPeriodStart: number | null  // start of range (0-14)
+  isFree: boolean
+  checkPeriodStart: number | null
 }
 
 export interface UpdateTriggerRequest {
   triggerId: string
   warehouseIds?: number[]
   boxTypes?: ('Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами')[]
-  coefficientThreshold?: number | null
+  isFree?: boolean
   isActive?: boolean
   checkPeriodStart?: number
 }
@@ -87,4 +87,11 @@ export interface TriggerError {
   status: number
   message: string
   triggerId?: string
+}
+
+export interface AcceptanceCoefficient {
+  warehouseName: string;
+  warehouseId: number;
+  boxType: string;
+  value: number;
 } 

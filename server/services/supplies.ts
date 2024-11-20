@@ -108,7 +108,7 @@ export class SuppliesService {
         userId,
         warehouseIds: data.warehouseIds,
         boxTypes: data.boxTypes,
-        coefficientThreshold: data.coefficientThreshold,
+        isFree: data.isFree,
         checkPeriodStart: data.checkPeriodStart ? Math.min(Math.max(data.checkPeriodStart, 0), 14) : null,
       },
     }) as SupplyTrigger;
@@ -137,7 +137,7 @@ export class SuppliesService {
       data: {
         warehouseIds: data.warehouseIds,
         boxTypes: data.boxTypes,
-        coefficientThreshold: data.coefficientThreshold,
+        isFree: data.isFree,
         isActive: data.isActive,
         checkPeriodStart: start,
       },
