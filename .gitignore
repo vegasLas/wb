@@ -5,6 +5,9 @@
 .nitro
 .cache
 dist
+# Docker
+compose.yml
+docker-compose.yml
 
 # Node dependencies
 node_modules
