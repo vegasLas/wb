@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  wb-supplies-db:
+    image: postgres:15
+    restart: always
+    expose:
+      - 5432
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_USER=critikk
+      - POSTGRES_PASSWORD=fadfafadfhNsanS
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - wb-supplies
+  app:
+    image: vegasslas/myapp-private:wb-supplies
+    restart: always
+    expose:
+      - 8000
+    ports:
+      - "8001:8000"
+    depends_on:
+      - wb-supplies-db
+    environment:
+      - PORT=8000
+      - TELEGRAM_BOT_TOKEN=7622315431:AAEKqs7R1tE5wUCLHgp2-IzZSWoJ_-fCc14
+      - DATABASE_URL=postgresql://critikk:fadfafadfhNsanS@wb-db:5432/mydatabase
+    networks:
+      - wb-supplies
+volumes:
+  postgres_data:
+    driver: local-persist
+    driver_opts:
+      mountpoint: /opt/beget/wb-supplies/data
+
+networks:
+  wb-supplies:
+    driver: bridge 
