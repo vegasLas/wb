@@ -1,6 +1,7 @@
 import prisma from '../services/prisma'
 import { TBOT } from "../utils/TBOT";
 import { SuppliesService } from '../services/supplies';
+import { decryptApiKey } from '../utils/apiKeyEncryption';
 async function checkSupplies() {
 	try {
 		// Get all active triggers with their users
@@ -19,11 +20,11 @@ async function checkSupplies() {
 		const triggersByApiKey = new Map<string, typeof activeTriggers>();
 		for (const trigger of activeTriggers) {
 			if (!trigger.user.wbApiKey) continue;
-			
-			if (!triggersByApiKey.has(trigger.user.wbApiKey)) {
-				triggersByApiKey.set(trigger.user.wbApiKey, []);
+			const apiKey = decryptApiKey(trigger.user.wbApiKey);
+			if (!triggersByApiKey.has(apiKey)) {
+				triggersByApiKey.set(apiKey, []);
 			}
-			triggersByApiKey.get(trigger.user.wbApiKey)?.push(trigger);
+			triggersByApiKey.get(apiKey)?.push(trigger);
 		}
 		
 		// Process triggers for each API key

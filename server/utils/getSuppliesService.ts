@@ -2,6 +2,7 @@ import { H3Event } from 'h3'
 import { getUserFromEvent } from './getUserFromEvent'
 import { SuppliesService } from '../services/supplies'
 import prisma from '../services/prisma'
+import { decryptApiKey } from './apiKeyEncryption'
 
 export async function getSuppliesService(event: H3Event): Promise<SuppliesService> {
   const user = await getUserFromEvent(event)
@@ -28,5 +29,5 @@ export async function getSuppliesService(event: H3Event): Promise<SuppliesServic
     })
   }
 
-  return SuppliesService.getInstance(userData.wbApiKey)
+  return SuppliesService.getInstance(decryptApiKey(userData.wbApiKey))
 } 
