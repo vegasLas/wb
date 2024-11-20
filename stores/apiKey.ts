@@ -16,8 +16,8 @@ export const useApiKeyStore = defineStore('apiKey', () => {
     try {
       loading.value = true
       const response = await apiUpdateApiKey(apiKey.value)
-      if (response.data.wbApiKey) {
-        apiKey.value = response.data.wbApiKey
+      if (!response.success) {
+        throw new Error(response.message)
       }
       return response
     } catch (err) {

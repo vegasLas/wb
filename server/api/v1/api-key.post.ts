@@ -1,4 +1,5 @@
 import { getUserFromEvent } from '~/server/utils/getUserFromEvent'
+import { encryptApiKey } from '~/server/utils/apiKeyEncryption'
 import prisma from '~/server/services/prisma'
 
 export default defineEventHandler(async (event) => {
@@ -9,7 +10,7 @@ export default defineEventHandler(async (event) => {
       message: 'Unauthorized'
     })
   }
-  // Get the API key from request body
+  
   const body: { apiKey: string } = await readBody(event)
   const { apiKey } = body
 
@@ -20,13 +21,15 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Update the user's API key in the database
-  const updatedUser = await prisma.user.update({
+  // Encrypt the API key before storing
+  const encryptedApiKey = encryptApiKey(apiKey)
+
+  await prisma.user.update({
     where: {
       telegramId: user.telegramId
     },
     data: {
-      wbApiKey: apiKey
+      wbApiKey: encryptedApiKey
     },
     select: {
       wbApiKey: true
@@ -35,8 +38,5 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
-    data: {
-      wbApiKey: updatedUser.wbApiKey
-    }
   }
 }) 
