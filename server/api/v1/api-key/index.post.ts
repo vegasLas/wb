@@ -13,7 +13,6 @@ export default defineEventHandler(async (event) => {
   
   const body: { apiKey: string } = await readBody(event)
   const { apiKey } = body
-
   if (!apiKey) {
     throw createError({
       statusCode: 400,

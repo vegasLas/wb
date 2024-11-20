@@ -16,6 +16,10 @@ export default defineNuxtConfig({
       '~/server/plugins/telegram.ts'
     ]
   },
+  css: [
+    '@/node_modules/vue-preloader/dist/style.css',
+    '~/styles/global.css',
+  ],
 
   compatibilityDate: '2024-11-16'
 })

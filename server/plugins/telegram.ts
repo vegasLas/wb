@@ -35,7 +35,6 @@ async function checkSupplies() {
 				trigger.warehouseIds.forEach(id => allWarehouseIds.add(id));
 			}
 			const supplies = await suppliesService.getCoefficients(Array.from(allWarehouseIds).join(','));
-
 			for (const trigger of triggers) {
 				// Skip if user has no chatId
 				if (!trigger.user.chatId) continue;
@@ -43,13 +42,19 @@ async function checkSupplies() {
 				try {
 					// Filter supplies based on trigger criteria
 					const matchingSupplies = supplies.filter(supply => {
+						if (!trigger.warehouseIds.includes(supply.warehouseID)) {
+							return false;
+						}
 						// Check if box type matches
-						if (!trigger.boxTypes.includes(supply.boxType)) {
+						if (!trigger.boxTypes.includes(supply.boxTypeName)) {
 							return false;
 						}
 
 						// Check if supply is free (if trigger requires free supplies)
 						if (trigger.isFree && supply.coefficient !== 0) {
+							return false;
+						}
+						else if (supply.coefficient === -1) {
 							return false;
 						}
 
@@ -70,6 +75,7 @@ async function checkSupplies() {
 						return true;
 					});
 
+
 					if (matchingSupplies.length > 0) {
 						// Update lastNotificationAt before sending message
 						await prisma.supplyTrigger.update({
@@ -77,17 +83,30 @@ async function checkSupplies() {
 							data: { lastNotificationAt: new Date() }
 						});
 
-						// Send notification to user about available supplies
-						const message = `🔔 Доступны слоты для поставки!\n\n` +
-							matchingSupplies.map(supply => {
-								const supplyDate = new Date(supply.date);
-								const formattedDate = supplyDate.toLocaleDateString('ru-RU');
-								return `Склад: ${supply.warehouseName}\n` +
-									`Тип коробки: ${supply.boxType}\n` +
-									`Дата: ${formattedDate}\n` +
-									`${supply.coefficient === 0 ? '✅ Бесплатная поставка' : '💰 Платная поставка'}\n`;
-							}).join('\n');
+						// Group supplies by warehouse and box type
+						const suppliesByWarehouseAndBox = matchingSupplies.reduce((acc, supply) => {
+							if (!acc[supply.warehouseName]) {
+								acc[supply.warehouseName] = {};
+							}
+							if (!acc[supply.warehouseName][supply.boxTypeName]) {
+								acc[supply.warehouseName][supply.boxTypeName] = [];
+							}
+							acc[supply.warehouseName][supply.boxTypeName].push(supply);
+							return acc;
+						}, {} as Record<string, Record<string, typeof matchingSupplies>>);
 
+						// Create message with each warehouse and box type on new lines
+						const message = `🔔 Доступные слоты:\n` + 
+							Object.entries(suppliesByWarehouseAndBox).map(([warehouseName, boxTypes]) => {
+								const boxTypeInfo = Object.entries(boxTypes).map(([boxType, supplies]) => {
+									const dates = supplies.map(supply => {
+										const date = new Date(supply.date).toLocaleDateString('ru-RU');
+										return `${date} ${supply.coefficient === 0 ? '✅' : '💰'}`;
+									}).join(' | ');
+									return `${boxType}:\n${dates}`;
+								}).join('\n');
+								return `${warehouseName}:\n${boxTypeInfo}`;
+							}).join('\n\n');
 						await TBOT.sendMessage(trigger.user.chatId, message);
 					}
 				} catch (error) {
@@ -109,7 +128,6 @@ async function processStart(msg: any) {
 				telegramId: msg.from.id
 			}
 		});
-
 		if (existingUser) {
 			// Update chat ID if it's different
 			if (existingUser.chatId !== currentChatId) {
@@ -143,11 +161,9 @@ async function processStart(msg: any) {
 	}
 }
 export default defineNitroPlugin((event) => {
+	
 	TBOT.onText(/\/start/, processStart);
 
-	// Add supply monitoring system
-	
-	// Start monitoring with 1-minute interval
 	const monitoringInterval = setInterval(checkSupplies, 20000);
 
 	// Clean up on server shutdown
