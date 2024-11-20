@@ -35,8 +35,8 @@
 
           <!-- Coefficient -->
           <div>
-            <span class="font-medium">Коэффициент: </span>
-            <span>{{ trigger.coefficientThreshold || 'Не задан' }}</span>
+            <span class="font-medium">Бесплатная приемка: </span>
+            <span>{{ trigger.isFree ? 'Да' : 'Нет' }}</span>
           </div>
 
           <!-- Check Period -->

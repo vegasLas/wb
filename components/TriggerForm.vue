@@ -36,27 +36,14 @@
           />
         </UFormGroup>
 
-        <UFormGroup name="useCoefficient">
+        <UFormGroup name="isFree">
           <UCheckbox 
-            v-model="triggerFormStore.useCoefficient" 
-            label="Использовать пороговый коэффициент"
+            v-model="triggerFormStore.form.isFree" 
+            label="Бесплатная поставка"
             color="blue"
           />
         </UFormGroup>
 
-        <UFormGroup 
-          v-if="triggerFormStore.useCoefficient"
-          label="Коэффициент" 
-          name="coefficientThreshold"
-          required
-        >
-          <UInput
-            v-model="triggerFormStore.form.coefficientThreshold"
-            type="number"
-            step="1"
-            placeholder="Введите пороговый коэффициент"
-          />
-        </UFormGroup>
         <UFormGroup name="useCheckPeriod">
           <UCheckbox 
             v-model="triggerFormStore.useCheckPeriod" 
