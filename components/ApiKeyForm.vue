@@ -2,11 +2,11 @@
   <div class="api-key-form">
     <UCard>
       <template #header>
-        <h2 class="text-xl font-semibold">API ключ Wildberries</h2>
+        <h2 class="text-xl font-semibold">API ключ Wildberries для поставок</h2>
       </template>
       <form @submit.prevent class="space-y-4">
         <UFormGroup
-          label="Введите ваш API ключ"
+          :label="hasApiKey ? 'Обновить API ключ' : 'Сохраните API ключ чтобы начать работу'"
           name="apiKey"
         >
           <UInput
@@ -29,16 +29,20 @@
             </template>
           </UInput>
         </UFormGroup>
+        <div class="description">
+          Чтобы взять ключ перейдите по <a style="color: #0088ff; text-decoration: none; text-underline-offset: 2px;" href="https://seller.wildberries.ru/supplier-settings/access-to-api" target="_blank">ссылке</a>, выберите поставки, скопируйте ключ и вставьте его.
+        </div>
       </form>
     </UCard>
   </div>
   <MainButton 
-    text="Сохранить API ключ" 
-    @click="apiKeyStore.updateApiKey()"
+    v-if="apiKey"
+    :text="hasApiKey ? 'Обновить' : 'Сохранить'"
+    @click="() => apiKeyStore.updateApiKey()"
     :progress="apiKeyStore.loading"
     :disabled="!apiKey"
   />
-  <BackButton @click="$emit('back')" />
+  <BackButton v-if="hasApiKey" @click="$emit('back')" />
 </template>
 
 <script setup lang="ts">
@@ -54,3 +58,11 @@ const {
 } = storeToRefs(apiKeyStore)
 
 </script> 
+
+<style scoped>
+.description {
+  font-size: 16px;
+  color: white;
+  margin-top: 10px;
+}
+</style> 

@@ -1,4 +1,4 @@
-import { updateApiKey as apiUpdateApiKey } from '~/api/apiKey'
+import { updateApiKey as apiUpdateApiKey, checkApiKeyExists as apiCheckApiKeyExists } from '~/api/apiKey'
 
 export const useApiKeyStore = defineStore('apiKey', () => {
   // state
@@ -6,10 +6,11 @@ export const useApiKeyStore = defineStore('apiKey', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
   const showApiKey = ref(false)
+  const hasApiKey = ref(false)
+
   // getters
   const isLoading = computed(() => loading.value)
   const hasError = computed(() => error.value !== null)
-  const hasApiKey = computed(() => !!apiKey.value)
 
   // actions
   async function updateApiKey() {
@@ -19,6 +20,7 @@ export const useApiKeyStore = defineStore('apiKey', () => {
       if (!response.success) {
         throw new Error(response.message)
       }
+      useSteps().setStep('list')
       return response
     } catch (err) {
       error.value = 'Failed to update API key'
@@ -27,21 +29,37 @@ export const useApiKeyStore = defineStore('apiKey', () => {
       loading.value = false
     }
   }
+
+  async function checkApiKeyExists() {
+    try {
+      loading.value = true
+      const { hasApiKey: exists } = await apiCheckApiKeyExists()
+      hasApiKey.value = exists
+    } catch (err) {
+      error.value = 'Failed to check API key'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   function toggleVisibility() {
     showApiKey.value = !showApiKey.value
   }
+
   return {
     // state
     apiKey,
     loading,
     error,
     showApiKey,
+    hasApiKey,
     // getters
     isLoading,
     hasError,
-    hasApiKey,
     // actions
     updateApiKey,
+    checkApiKeyExists,
     toggleVisibility,
   }
 }) 
