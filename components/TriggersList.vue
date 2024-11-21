@@ -40,9 +40,15 @@
           </div>
 
           <!-- Check Period -->
-          <div>
+          <div v-if="trigger.checkPeriodStart">
             <span class="font-medium">Отступ в днях: </span>
             <span>{{ trigger.checkPeriodStart }}</span>
+          </div>
+
+          <!-- Check Interval -->
+          <div>
+            <span class="font-medium">Интервал проверки: </span>
+            <span>{{ formatInterval(trigger.checkInterval) }}</span>
           </div>
 
           <!-- Created Date -->
@@ -70,7 +76,6 @@
 </template>
 
 <script setup lang="ts">
-
 const triggerStore = useTriggerStore()
 const warehouseStore = useWarehouses()
 

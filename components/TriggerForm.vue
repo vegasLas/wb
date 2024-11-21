@@ -44,6 +44,18 @@
           />
         </UFormGroup>
 
+        <UFormGroup 
+          label="Интервал проверки" 
+          name="checkInterval"
+          required
+        >
+          <USelect
+            v-model="triggerFormStore.form.checkInterval"
+            :options="triggerFormStore.intervalOptions"
+            placeholder="Выберите интервал проверки"
+          />
+        </UFormGroup>
+
         <UFormGroup name="useCheckPeriod">
           <UCheckbox 
             v-model="triggerFormStore.useCheckPeriod" 
@@ -57,7 +69,7 @@
           required
         >
           <UInput
-            v-model="triggerFormStore.form.checkPeriodStart"
+            v-model.number="triggerFormStore.form.checkPeriodStart"
             type="number"
             min="0"
             max="14"

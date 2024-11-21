@@ -10,14 +10,24 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
     warehouseIds: [],
     boxTypes: [],
     isFree: false,
-    checkPeriodStart: null
+    checkPeriodStart: null,
+    checkInterval: 180
   })
 
   const boxTypeOptions = [
     {label: 'Короба', value: 'Короба'},
     {label: 'Суперсейф', value: 'Суперсейф'},
     {label: 'Монопаллеты', value: 'Монопаллеты'},
-    {label: 'QR-поставка с коробами', value: 'QR-поставка с коробами'},
+    {label: 'QR-поставка с коробами', value: 'QR-поставка с коробами'}
+  ]
+
+  const intervalOptions = [
+    { label: '30 минут', value: 30 },
+    { label: '1 час', value: 60 },
+    { label: '3 часа', value: 180 },
+    { label: '6 часов', value: 360 },
+    { label: '12 часов', value: 720 },
+    { label: '24 часа', value: 1440 },
   ]
 
   const warehouseOptions = computed(() => {
@@ -54,6 +64,12 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
             .max(14, 'Период не может быть больше 14 дней'),
           otherwise: (schema) => schema.notRequired(),
         }),
+      
+      checkInterval: yup
+        .number()
+        .required('Выберите интервал проверки')
+        .min(30, 'Минимальный интервал 30 минут')
+        .max(1440, 'Максимальный интервал 24 часа'),
     })
   })
 
@@ -82,6 +98,7 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
       boxTypes: [],
       isFree: true,
       checkPeriodStart: 0,
+      checkInterval: 180,
     }
     useCheckPeriod.value = false
   }
@@ -101,6 +118,7 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
     validationContext,
     validate,
     initializeWarehouses,
-    resetForm
+    resetForm,
+    intervalOptions,
   }
 }) 

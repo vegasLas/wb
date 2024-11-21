@@ -1,8 +1,4 @@
 <template>
-  <div v-if="apiKeyStore.isLoading" class="triggers-container">
-    <ULoadingBar />
-  </div>
-  <template v-else>
     <template v-if="!apiKeyStore.hasApiKey">
       <ApiKeyForm @back="stepsStore.setStep('list')" />
     </template>
@@ -41,7 +37,6 @@
       <TriggerForm v-else-if="step === 'form'" @back="stepsStore.setStep('list')" />
       <ApiKeyForm v-else-if="step === 'api-key'" @back="stepsStore.setStep('list')" />
     </template>
-  </template>
 </template>
 
 <script setup lang="ts">
