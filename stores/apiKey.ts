@@ -20,6 +20,7 @@ export const useApiKeyStore = defineStore('apiKey', () => {
       if (!response.success) {
         throw new Error(response.message)
       }
+      hasApiKey.value = true
       useSteps().setStep('list')
       return response
     } catch (err) {

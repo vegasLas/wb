@@ -109,6 +109,7 @@ export class SuppliesService {
         warehouseIds: data.warehouseIds,
         boxTypes: data.boxTypes,
         isFree: data.isFree,
+        checkInterval: data.checkInterval,
         checkPeriodStart: data.checkPeriodStart ? Math.min(Math.max(data.checkPeriodStart, 0), 14) : null,
       },
     }) as SupplyTrigger;

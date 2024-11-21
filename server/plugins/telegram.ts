@@ -8,10 +8,6 @@ async function checkSupplies() {
 		const activeTriggers = await prisma.supplyTrigger.findMany({
 			where: { 
 				isActive: true,
-				OR: [
-					{ lastNotificationAt: null },
-					{ lastNotificationAt: { lt: new Date(Date.now() - 60 * 60 * 1000) } } // Last hour
-				]
 			},
 			include: { user: true }
 		});
@@ -38,6 +34,16 @@ async function checkSupplies() {
 			for (const trigger of triggers) {
 				// Skip if user has no chatId
 				if (!trigger.user.chatId) continue;
+
+				// Check if enough time has passed since last notification
+				if (trigger.lastNotificationAt) {
+					const timeSinceLastNotification = Date.now() - trigger.lastNotificationAt.getTime();
+					const minimumInterval = trigger.checkInterval * 60 * 1000; // Convert minutes to milliseconds
+					
+					if (timeSinceLastNotification < minimumInterval) {
+						continue; // Skip this trigger if not enough time has passed
+					}
+				}
 
 				try {
 					// Filter supplies based on trigger criteria

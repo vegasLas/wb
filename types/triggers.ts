@@ -6,6 +6,7 @@ export interface SupplyTrigger {
   isFree: boolean
   isActive: boolean
   checkPeriodStart: number  // start of range (0-14)
+  checkInterval: number     // interval in minutes
   createdAt: Date
   updatedAt: Date
 }
@@ -15,6 +16,7 @@ export interface CreateTriggerRequest {
   boxTypes: ("Короба" | "Суперсейф" | "Монопаллеты" | "QR-поставка с коробами")[]
   isFree: boolean
   checkPeriodStart: number | null
+  checkInterval: number
 }
 
 export interface UpdateTriggerRequest {
@@ -24,6 +26,7 @@ export interface UpdateTriggerRequest {
   isFree?: boolean
   isActive?: boolean
   checkPeriodStart?: number
+  checkInterval?: number
 }
 
 export interface CreateTriggerResponse {
@@ -33,4 +36,5 @@ export interface CreateTriggerResponse {
   isFree?: boolean
   isActive?: boolean
   checkPeriodStart?: number
+  checkInterval?: number
 }
