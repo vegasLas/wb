@@ -2,7 +2,8 @@ import {
   createTrigger as apiCreateTrigger,
   updateTrigger as apiUpdateTrigger,
   deleteTrigger as apiDeleteTrigger,
-  getTriggers as apiGetTriggers
+  getTriggers as apiGetTriggers,
+  toggleTrigger as apiToggleTrigger
 } from '~/api/triggers'
 import type { 
   CreateTriggerRequest, 
@@ -100,6 +101,22 @@ export const useTriggerStore = defineStore('triggers', () => {
     }
   }
 
+  async function toggleTrigger(triggerId: string): Promise<void> {
+    try {
+      loading.value = true
+      const updatedTrigger = await apiToggleTrigger(triggerId)
+      const index = triggers.value.findIndex(t => t.id === triggerId)
+      if (index !== -1 && updatedTrigger) {
+        triggers.value[index] = updatedTrigger
+      }
+    } catch (err) {
+      error.value = 'Failed to toggle trigger'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // state
     triggers,
@@ -115,5 +132,6 @@ export const useTriggerStore = defineStore('triggers', () => {
     updateTrigger,
     fetchTriggers,
     deleteTrigger,
+    toggleTrigger,
   }
 })

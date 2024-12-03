@@ -69,7 +69,7 @@
           required
         >
           <UInput
-            v-model.number="triggerFormStore.form.checkPeriodStart"
+            v-model.number="triggerFormStore.form.checkPeriodStart "
             type="number"
             min="0"
             max="14"

@@ -44,4 +44,15 @@ export async function deleteTrigger(triggerId: string): Promise<void> {
       'x-init-data': initData,
     },
   })
+}
+
+export async function toggleTrigger(triggerId: string): Promise<SupplyTrigger> {
+  const initData = (await import('vue-tg')).useWebApp().initData
+  return await $fetch<SupplyTrigger>('/api/v1/triggers', {
+    method: 'PATCH',
+    body: { triggerId },
+    headers: {
+      'x-init-data': initData,
+    },
+  })
 } 

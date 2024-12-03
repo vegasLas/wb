@@ -1,6 +1,5 @@
-import { getUserFromEvent } from '~/server/utils/getUserFromEvent'
-import { encryptApiKey } from '~/server/utils/apiKeyEncryption'
 import prisma from '~/server/services/prisma'
+import { SuppliesService } from '~/server/services/supplies'
 
 export default defineEventHandler(async (event) => {
   const user = await getUserFromEvent(event)
@@ -20,6 +19,18 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Check API key validity by making a test request to WB API
+  try {
+    const suppliesService = SuppliesService.getInstance(apiKey)
+    await suppliesService.getWarehouses()
+  } catch (error) {
+    return {
+      success: false,
+      message: 'Не валидный ключ, убедитесь что он корректный, следуйте инструкции в описании'
+    }
+  }
+
+  // If we reach here, the API key is valid
   // Encrypt the API key before storing
   const encryptedApiKey = encryptApiKey(apiKey)
 
@@ -37,5 +48,6 @@ export default defineEventHandler(async (event) => {
 
   return {
     success: true,
+    message: 'API key successfully updated'
   }
 }) 

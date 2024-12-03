@@ -17,9 +17,12 @@ export const useApiKeyStore = defineStore('apiKey', () => {
     try {
       loading.value = true
       const response = await apiUpdateApiKey(apiKey.value)
+      
       if (!response.success) {
-        throw new Error(response.message)
+        error.value = response.message
+        return response
       }
+      
       hasApiKey.value = true
       useSteps().setStep('list')
       return response

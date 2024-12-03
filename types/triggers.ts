@@ -15,7 +15,7 @@ export interface CreateTriggerRequest {
   warehouseIds: number[]
   boxTypes: ("Короба" | "Суперсейф" | "Монопаллеты" | "QR-поставка с коробами")[]
   isFree: boolean
-  checkPeriodStart: number | null
+  checkPeriodStart: number
   checkInterval: number
 }
 
