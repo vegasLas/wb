@@ -16,6 +16,7 @@
             placeholder="Введите API ключ Wildberries"
             :trailing="(hasApiKey && apiKey) ? undefined : false"
             size="lg"
+            :state="error ? 'error' : undefined"
           >
             <template #trailing>
               <UButton
@@ -28,9 +29,11 @@
               />
             </template>
           </UInput>
+          <p v-if="error" class="text-red-500 text-sm mt-1">{{ error }}</p>
         </UFormGroup>
         <div class="description">
           Чтобы взять ключ перейдите по <a style="color: #0088ff; text-decoration: none; text-underline-offset: 2px;" href="https://seller.wildberries.ru/supplier-settings/access-to-api" target="_blank">ссылке</a>, выберите поставки, скопируйте ключ и вставьте его.
+          Обратите внимание, что если вы введете не корректный ключ, то бот не будет работать.
         </div>
       </form>
     </UCard>
@@ -38,7 +41,7 @@
   <MainButton 
     v-if="apiKey"
     :text="hasApiKey ? 'Обновить' : 'Сохранить'"
-    @click="() => apiKeyStore.updateApiKey()"
+    @click="apiKeyStore.updateApiKey"
     :progress="apiKeyStore.loading"
     :disabled="!apiKey"
   />
@@ -52,7 +55,7 @@ const apiKeyStore = useApiKeyStore()
 const {
   apiKey,
   isLoading,
-
+  error,
   hasApiKey,
   showApiKey,
 } = storeToRefs(apiKeyStore)

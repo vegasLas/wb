@@ -10,7 +10,7 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
     warehouseIds: [],
     boxTypes: [],
     isFree: false,
-    checkPeriodStart: null,
+    checkPeriodStart: 0,
     checkInterval: 180
   })
 
@@ -18,7 +18,6 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
     {label: 'Короба', value: 'Короба'},
     {label: 'Суперсейф', value: 'Суперсейф'},
     {label: 'Монопаллеты', value: 'Монопаллеты'},
-    {label: 'QR-поставка с коробами', value: 'QR-поставка с коробами'}
   ]
 
   const intervalOptions = [

@@ -168,4 +168,24 @@ export class SuppliesService {
       orderBy: { createdAt: 'desc' },
     }) as SupplyTrigger[];
   }
+
+  async toggleTriggerActive(userId: number, triggerId: string): Promise<SupplyTrigger> {
+    const trigger = await prisma.supplyTrigger.findFirst({
+      where: {
+        id: triggerId,
+        userId,
+      },
+    });
+
+    if (!trigger) {
+      throw new Error('Trigger not found');
+    }
+
+    return await prisma.supplyTrigger.update({
+      where: { id: triggerId },
+      data: {
+        isActive: !trigger.isActive,
+      },
+    }) as SupplyTrigger;
+  }
 } 

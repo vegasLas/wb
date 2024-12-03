@@ -7,6 +7,7 @@ export const useWarehouses = defineStore('warehouses', () => {
     return warehouses.value.find(w => w.ID === warehouseId)?.name ?? warehouseId
   }
   async function fetchWarehouses() {
+    if (warehouses.value.length > 0) return
     const response = await getWarehouses()
     if (response.data.value) {
       warehouses.value = response.data.value

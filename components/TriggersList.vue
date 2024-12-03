@@ -59,6 +59,14 @@
 
         <div class="flex gap-2">
           <UButton
+          color="blue"
+          variant="soft"
+          @click="triggerStore.toggleTrigger(trigger.id)"
+          >
+          {{ trigger.isActive ? 'стоп' : 'запуск' }}
+        </UButton>
+
+          <UButton
             color="red"
             variant="soft"
             icon="i-heroicons-trash"
@@ -93,5 +101,4 @@ function formatDate(date: Date) {
     day: 'numeric',
   })
 }
-
 </script> 

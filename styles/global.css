@@ -1,5 +1,6 @@
 body {
   font-family: 'Roboto', serif; /* Apply the font to the entire body */
+  background-color: black;
 }
 
 /* You can also add specific styles for headings or other elements if needed */
