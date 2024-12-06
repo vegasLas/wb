@@ -1,56 +1,42 @@
 <template>
-    <template v-if="!apiKeyStore.hasApiKey">
-      <ApiKeyForm @back="stepsStore.setStep('list')" />
-    </template>
-    <template v-else>
-      <div :class="[props.showMain ? 'visible' : 'invisible']" v-if="step === 'list'" class="triggers-container">
-        <div class="triggers-header">
-          <div class="triggers-stats">
-            <span class="triggers-label">триггеров: </span>
-            <span class="triggers-count">{{ triggerStore.triggers.length }}</span>
-          </div>
-          
-          <div class="button-row">
-            <UButton
-              @click="stepsStore.setStep('api-key')"
-              icon="i-heroicons-key"
-              size="sm"
-              color="primary"/>
-            <UButton
-              @click="stepsStore.setStep('form')"
-              icon="i-heroicons-plus"
-              size="sm"
-              color="primary"
-              trailing
-            >
-              Создать триггер
-            </UButton>
-          </div>
-        </div>
-
-        <TriggersList />
+  <div :class="[props.showMain ? 'visible' : 'invisible']" v-if="step === 'list'" class="triggers-container">
+    <div class="triggers-header">
+      <div class="triggers-stats">
+        <span class="triggers-label">триггеров: </span>
+        <span class="triggers-count">{{ triggerStore.triggers.length }}</span>
       </div>
-      <TriggerForm v-else-if="step === 'form'" @back="stepsStore.setStep('list')" />
-      <ApiKeyForm v-else-if="step === 'api-key'" @back="stepsStore.setStep('list')" />
-    </template>
+      
+      <div class="button-row">
+        <UButton
+          @click="stepsStore.setStep('form')"
+          icon="i-heroicons-plus"
+          size="sm"
+          color="primary"
+          trailing
+        >
+          Создать триггер
+        </UButton>
+      </div>
+    </div>
+
+    <TriggersList />
+  </div>
+  <TriggerForm v-else-if="step === 'form'" @back="stepsStore.setStep('list')" />
 </template>
 
 <script setup lang="ts">
 const triggerStore = useTriggerStore()
 const stepsStore = useSteps()
 const { step } = storeToRefs(stepsStore)
-const apiKeyStore = useApiKeyStore()
 const props = defineProps<{
   showMain: boolean
 }>()
+
 onMounted(async () => {
   try {
-    await apiKeyStore.checkApiKeyExists()
-    if (apiKeyStore.hasApiKey) {
-      await triggerStore.fetchTriggers()
-    }
+    await triggerStore.fetchTriggers()
   } catch (error) {
-    console.error('Failed to check API key:', error)
+    console.error('Failed to fetch triggers:', error)
   }
 })
 </script>

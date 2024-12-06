@@ -1,13 +1,14 @@
+import { suppliesService } from "~/server/services/supplies";
+
 export default defineEventHandler(async (event) => {
   try {
     const user = await getUserFromEvent(event);
     if (!user) {
       throw createError({
         statusCode: 401,
-        message: 'Unauthorized'
+        message: 'Unauthorized' 
       })
     }
-    const suppliesService = await getSuppliesService(event);
     const triggers = await suppliesService.getUserTriggers(user.id);
 
     return triggers

@@ -1,3 +1,5 @@
+import { suppliesService } from "~/server/services/supplies"
+
 export default defineEventHandler(async (event) => {
   const user = await getUserFromEvent(event)
   if (!user) {
@@ -10,6 +12,5 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Missing triggerId' })
   }
 
-  const suppliesService = await getSuppliesService(event);
   return await suppliesService.toggleTriggerActive(user.id, triggerId)
 }) 

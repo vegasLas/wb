@@ -1,5 +1,5 @@
 import prisma from '~/server/services/prisma'
-import { SuppliesService } from '~/server/services/supplies'
+import { suppliesService } from '~/server/services/supplies'
 
 export default defineEventHandler(async (event) => {
   const user = await getUserFromEvent(event)
@@ -21,7 +21,6 @@ export default defineEventHandler(async (event) => {
 
   // Check API key validity by making a test request to WB API
   try {
-    const suppliesService = SuppliesService.getInstance(apiKey)
     await suppliesService.getWarehouses()
   } catch (error) {
     return {
