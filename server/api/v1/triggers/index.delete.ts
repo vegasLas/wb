@@ -1,3 +1,4 @@
+import { suppliesService } from "~/server/services/supplies";
 
 export default defineEventHandler(async (event) => {
   try {
@@ -10,7 +11,6 @@ export default defineEventHandler(async (event) => {
     }
     const { triggerId } = await readBody<{ triggerId: string }>(event);
     
-    const suppliesService = await getSuppliesService(event);
     await suppliesService.deleteTrigger(user.id, triggerId);
 
     return {

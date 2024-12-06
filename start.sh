@@ -11,9 +11,8 @@ npm install
 echo -e "\033[1mGenerating Prisma client...\033[0m\n"
 npx prisma generate
 
-# Create and apply migrations
-echo -e "\033[1mCreating and applying migrations...\033[0m\n"
-# npx prisma migrate dev --name your_migration_name
+# Apply migrations (production-safe way)
+echo -e "\033[1mApplying database migrations...\033[0m\n"
 npx prisma migrate deploy
 
 # Build the Nuxt application

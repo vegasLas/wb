@@ -17,6 +17,7 @@
 <script setup lang="ts">
 import { VuePreloader } from "vue-preloader";
 const showMain = ref(false);
+
 function showMainAfterPreloader() {
     showMain.value = true;
 }

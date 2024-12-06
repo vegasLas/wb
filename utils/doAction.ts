@@ -1,29 +1,30 @@
 export const doAction = async (options: {
-	title: string
-	message: string
-  buttonText: string
+  title: string;
+  message: string;
+  buttonText: string;
 }) => {
-  const useWebAppPopup = (await import('vue-tg')).useWebAppPopup
-
+  const useWebAppPopup = (await import("vue-tg")).useWebAppPopup;
   return new Promise((resolve) => {
-    const { showPopup, onPopupClosed } = useWebAppPopup()
-    
-    const popupClosed = onPopupClosed(async (e) => {
-      if (e.button_id !== 'cancel') {
-        resolve(false)
-        popupClosed.off()
-        return
-      }
-      resolve(true)
-    }, { manual: true })
+    const { showPopup, onPopupClosed } = useWebAppPopup();
+    const popupClosed = onPopupClosed(
+      async (e) => {
+        if (e.button_id !== "cancel") {
+          resolve(false);
+          popupClosed.off();
+          return;
+        }
+        resolve(true);
+      },
+      { manual: true },
+    );
 
     showPopup({
       title: options.title,
       message: options.message,
       buttons: [
-        { id: 'cancel', type: 'default', text: options.buttonText },
-        { text: 'Закрыть', type: 'destructive' },
+        { id: "cancel", type: "default", text: options.buttonText },
+        { text: "Закрыть", type: "destructive" },
       ],
-    })
-  })
-}
+    });
+  });
+};

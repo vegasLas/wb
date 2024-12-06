@@ -7,28 +7,33 @@ const COEFFICIENTS_LIMIT = 6 // 6 requests per minute
 const OPTIONS_LIMIT = 30 // 30 requests per minute
 const WAREHOUSES_LIMIT = 6 // 6 requests per minute
 
-export class SuppliesService {
-  private api: AxiosInstance
-  private static instances: Map<string, SuppliesService> = new Map()
-  private coefficientsCounter = 0
-  private optionsCounter = 0
-  private warehousesCounter = 0
-  private lastResetTime = Date.now()
+class SuppliesService {
+  private static instance: SuppliesService;
+  private api: AxiosInstance;
+  private coefficientsCounter = 0;
+  private optionsCounter = 0;
+  private warehousesCounter = 0;
+  private lastResetTime = Date.now();
 
-  private constructor(apiKey: string) {
+  private constructor() {
+    const apiKey = process.env.WB_API_KEY;
+    if (!apiKey) {
+      throw new Error('WB_API_KEY environment variable is not set');
+    }
+
     this.api = axios.create({
       baseURL: 'https://supplies-api.wildberries.ru',
       headers: {
         'Authorization': apiKey,
       }
-    })
+    });
   }
 
-  static getInstance(apiKey: string): SuppliesService {
-    if (!this.instances.has(apiKey)) {
-      this.instances.set(apiKey, new SuppliesService(apiKey))
+  static getInstance(): SuppliesService {
+    if (!this.instance) {
+      this.instance = new SuppliesService();
     }
-    return this.instances.get(apiKey)!
+    return this.instance;
   }
 
   private resetCountersIfNeeded() {
@@ -189,3 +194,4 @@ export class SuppliesService {
     }) as SupplyTrigger;
   }
 } 
+export const suppliesService = SuppliesService.getInstance();

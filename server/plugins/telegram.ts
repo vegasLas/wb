@@ -1,7 +1,6 @@
 import prisma from '../services/prisma'
 import { TBOT } from "../utils/TBOT";
-import { SuppliesService } from '../services/supplies';
-import { decryptApiKey } from '../utils/apiKeyEncryption';
+import { suppliesService } from '../services/supplies';
 async function checkSupplies() {
 	try {
 		// Get all active triggers with their users
@@ -12,112 +11,105 @@ async function checkSupplies() {
 			include: { user: true }
 		});
 
-		// Group triggers by user's API key to reuse SuppliesService instances
-		const triggersByApiKey = new Map<string, typeof activeTriggers>();
-		for (const trigger of activeTriggers) {
-			if (!trigger.user.wbApiKey) continue;
-			const apiKey = decryptApiKey(trigger.user.wbApiKey);
-			if (!triggersByApiKey.has(apiKey)) {
-				triggersByApiKey.set(apiKey, []);
-			}
-			triggersByApiKey.get(apiKey)?.push(trigger);
-		}
+		// No need to group by API key anymore since we use a single instance
 		
-		// Process triggers for each API key
-		for (const [apiKey, triggers] of triggersByApiKey.entries()) {
-			const suppliesService = SuppliesService.getInstance(apiKey);
-			const allWarehouseIds = new Set<number>();
-			for (const trigger of triggers) {
-				trigger.warehouseIds.forEach(id => allWarehouseIds.add(id));
-			}
-			const supplies = await suppliesService.getCoefficients(Array.from(allWarehouseIds).join(','));
-			for (const trigger of triggers) {
-				// Skip if user has no chatId
-				if (!trigger.user.chatId) continue;
+		// Get all unique warehouse IDs from all triggers
+		const allWarehouseIds = new Set<number>();
+		for (const trigger of activeTriggers) {
+			trigger.warehouseIds.forEach(id => allWarehouseIds.add(id));
+		}
 
-				// Check if enough time has passed since last notification
-				if (trigger.lastNotificationAt) {
-					const timeSinceLastNotification = Date.now() - trigger.lastNotificationAt.getTime();
-					const minimumInterval = trigger.checkInterval * 60 * 1000; // Convert minutes to milliseconds
-					
-					if (timeSinceLastNotification < minimumInterval) {
-						continue; // Skip this trigger if not enough time has passed
-					}
+		// Get supplies for all warehouses at once
+		const supplies = await suppliesService.getCoefficients(Array.from(allWarehouseIds).join(','));
+
+		// Process each trigger
+		for (const trigger of activeTriggers) {
+			// Skip if user has no chatId
+			if (!trigger.user.chatId) continue;
+
+			// Check if enough time has passed since last notification
+			if (trigger.lastNotificationAt) {
+				const timeSinceLastNotification = Date.now() - trigger.lastNotificationAt.getTime();
+				const minimumInterval = trigger.checkInterval * 60 * 1000; // Convert minutes to milliseconds
+				
+				if (timeSinceLastNotification < minimumInterval) {
+					continue; // Skip this trigger if not enough time has passed
 				}
+			}
 
-				try {
-					// Filter supplies based on trigger criteria
-					const matchingSupplies = supplies.filter(supply => {
-						if (!trigger.warehouseIds.includes(supply.warehouseID)) {
+			try {
+				// Filter supplies based on trigger criteria
+				const matchingSupplies = supplies.filter(supply => {
+					if (supply.coefficient === -1) {
+						return false;
+					}
+					if (!trigger.warehouseIds.includes(supply.warehouseID)) {
+						return false;
+					}
+					// Check if box type matches
+					if (!trigger.boxTypes.includes(supply.boxTypeName)) {
+						return false;
+					}
+
+					// Check if supply is free (if trigger requires free supplies)
+					if (trigger.isFree && supply.coefficient !== 0) {
+						return false;
+					}
+
+					// Check if date is within the allowed range based on checkPeriodStart
+					if (trigger.checkPeriodStart !== null) {
+						const supplyDate = new Date(supply.date);
+						const today = new Date();
+						const daysDifference = Math.floor(
+							(supplyDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+						);
+						
+						// Only include supplies that start from the specified day count
+						if (daysDifference < trigger.checkPeriodStart) {
 							return false;
 						}
-						// Check if box type matches
-						if (!trigger.boxTypes.includes(supply.boxTypeName)) {
-							return false;
-						}
+					}
 
-						// Check if supply is free (if trigger requires free supplies)
-						if (trigger.isFree && supply.coefficient !== 0) {
-							return false;
-						}
-						else if (supply.coefficient === -1) {
-							return false;
-						}
+					return true;
+				});
 
-						// Check if date is within the allowed range based on checkPeriodStart
-						if (trigger.checkPeriodStart !== null) {
-							const supplyDate = new Date(supply.date);
-							const today = new Date();
-							const daysDifference = Math.floor(
-								(supplyDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-							);
-							
-							// Only include supplies that start from the specified day count
-							if (daysDifference < trigger.checkPeriodStart) {
-								return false;
-							}
-						}
 
-						return true;
+				if (matchingSupplies.length > 0) {
+					// Update lastNotificationAt before sending message
+					await prisma.supplyTrigger.update({
+						where: { id: trigger.id },
+						data: { lastNotificationAt: new Date() }
 					});
 
+					// Group supplies by warehouse and box type
+					const suppliesByWarehouseAndBox = matchingSupplies.reduce((acc, supply) => {
+						if (!acc[supply.warehouseName]) {
+							acc[supply.warehouseName] = {};
+						}
+						if (!acc[supply.warehouseName][supply.boxTypeName]) {
+							acc[supply.warehouseName][supply.boxTypeName] = [];
+						}
+						acc[supply.warehouseName][supply.boxTypeName].push(supply);
+						return acc;
+					}, {} as Record<string, Record<string, typeof matchingSupplies>>);
 
-					if (matchingSupplies.length > 0) {
-						// Update lastNotificationAt before sending message
-						await prisma.supplyTrigger.update({
-							where: { id: trigger.id },
-							data: { lastNotificationAt: new Date() }
-						});
-
-						// Group supplies by warehouse and box type
-						const suppliesByWarehouseAndBox = matchingSupplies.reduce((acc, supply) => {
-							if (!acc[supply.warehouseName]) {
-								acc[supply.warehouseName] = {};
-							}
-							if (!acc[supply.warehouseName][supply.boxTypeName]) {
-								acc[supply.warehouseName][supply.boxTypeName] = [];
-							}
-							acc[supply.warehouseName][supply.boxTypeName].push(supply);
-							return acc;
-						}, {} as Record<string, Record<string, typeof matchingSupplies>>);
-
-						// Create message with each warehouse and box type on new lines
-						const message = `🔔 Доступные слоты:\n` + 
-							Object.entries(suppliesByWarehouseAndBox).map(([warehouseName, boxTypes]) => {
-								const boxTypeInfo = Object.entries(boxTypes).map(([boxType, supplies]) => {
-									const dates = supplies.map(supply => {
-										const date = new Date(supply.date).toLocaleDateString('ru-RU');
-										return `${date} ${supply.coefficient === 0 ? '✅' : '💰'}`;
-									}).join(' | ');
-									return `${boxType}:\n${dates}`;
-								}).join('\n');
-								return `${warehouseName}:\n${boxTypeInfo}`;
-							}).join('\n\n');
-						await TBOT.sendMessage(trigger.user.chatId, message);
-					}
-				} catch (error) {
-					console.error(`Error checking supplies for trigger ${trigger.id}:`, error);
+					// Create message with each warehouse and box type on new lines
+					const message = `🔔 Доступные слоты:\n` + 
+						Object.entries(suppliesByWarehouseAndBox).map(([warehouseName, boxTypes]) => {
+							const boxTypeInfo = Object.entries(boxTypes).map(([boxType, supplies]) => {
+								const dates = supplies.map(supply => {
+									const date = new Date(supply.date).toLocaleDateString('ru-RU');
+									return `${date} ${supply.coefficient === 0 ? '✅' : '💰'}`;
+								}).join(' | ');
+								return `${boxType}:\n${dates}`;
+							}).join('\n');
+							return `${warehouseName}:\n${boxTypeInfo}`;
+						}).join('\n\n');
+					if (trigger.user.id === 1) console.log('suppliesByWarehouseAndBox', suppliesByWarehouseAndBox)
+					await TBOT.sendMessage(trigger.user.chatId, message);
 				}
+			} catch (error) {
+				console.error(`Error checking supplies for trigger ${trigger.id}:`, error);
 			}
 		}
 	} catch (error) {

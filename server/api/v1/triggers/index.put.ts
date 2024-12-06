@@ -1,3 +1,4 @@
+import { suppliesService } from '~/server/services/supplies';
 import { UpdateTriggerRequest } from '~/server/types/supplies';
 
 export default defineEventHandler(async (event) => {
@@ -11,7 +12,6 @@ export default defineEventHandler(async (event) => {
     }
     const body = await readBody<UpdateTriggerRequest>(event);
     
-    const suppliesService = await getSuppliesService(event);
     const trigger = await suppliesService.updateTrigger(user.id, body);
 
     return trigger
