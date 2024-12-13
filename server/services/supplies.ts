@@ -35,9 +35,9 @@ class SuppliesService {
     }
     return this.instance;
   }
-
+  
   private resetCountersIfNeeded() {
-    const now = Date.now()
+  const now = Date.now()
     if (now - this.lastResetTime >= 60000) { // Reset counters every minute
       this.coefficientsCounter = 0
       this.optionsCounter = 0

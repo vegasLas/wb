@@ -27,6 +27,7 @@ model SupplyTrigger {
   isActive            Boolean  @default(true)
   checkPeriodStart    Int?
   checkInterval       Int       @default(180)
+  maxCoefficient      Float   @default(0)
   lastNotificationAt  DateTime?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt

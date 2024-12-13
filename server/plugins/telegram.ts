@@ -40,12 +40,18 @@ async function checkSupplies() {
 			try {
 				// Filter supplies based on trigger criteria
 				const matchingSupplies = supplies.filter(supply => {
-					if (supply.coefficient === -1) {
+					// Skip if coefficient is -1 and no trigger
+					// Check if supply is available based on coefficient and allowUnload
+					if (!supply.allowUnload || (supply.coefficient === -1)) {
 						return false;
 					}
+
+
+					// Skip if warehouse not in trigger's warehouse list
 					if (!trigger.warehouseIds.includes(supply.warehouseID)) {
 						return false;
 					}
+
 					// Check if box type matches
 					if (!trigger.boxTypes.includes(supply.boxTypeName)) {
 						return false;
@@ -54,6 +60,15 @@ async function checkSupplies() {
 					// Check if supply is free (if trigger requires free supplies)
 					if (trigger.isFree && supply.coefficient !== 0) {
 						return false;
+					}
+
+					// Check maxCoefficient if it's set (not 0)
+					if (trigger.maxCoefficient > 0) {
+						// Skip if supply coefficient is higher than max allowed
+						// Don't apply this check to free supplies (coefficient === 0)
+						if (supply.coefficient !== 0 && supply.coefficient > trigger.maxCoefficient) {
+							return false;
+						}
 					}
 
 					// Check if date is within the allowed range based on checkPeriodStart
@@ -99,14 +114,20 @@ async function checkSupplies() {
 							const boxTypeInfo = Object.entries(boxTypes).map(([boxType, supplies]) => {
 								const dates = supplies.map(supply => {
 									const date = new Date(supply.date).toLocaleDateString('ru-RU');
-									return `${date} ${supply.coefficient === 0 ? '✅' : '💰'}`;
+									return `${date} 📅`;
 								}).join(' | ');
-								return `${boxType}:\n${dates}`;
+								const coefficient = supplies[0].coefficient; // Assuming all supplies have the same coefficient
+								return `${coefficient === 0 ? 'Бесплатно 🎉' : `Коэффициент: ${coefficient} 💰`}\n\n${boxType} :\n${dates}`;
 							}).join('\n');
-							return `${warehouseName}:\n${boxTypeInfo}`;
+							return `${warehouseName} 🏢:\n${boxTypeInfo}`;
 						}).join('\n\n');
-					if (trigger.user.id === 1) console.log('suppliesByWarehouseAndBox', suppliesByWarehouseAndBox)
-					await TBOT.sendMessage(trigger.user.chatId, message);
+					if (trigger.user.id === 1) {
+						const detailedMessage = `${message}\n\n${JSON.stringify(matchingSupplies[0], null, 2)}`;
+						await TBOT.sendMessage(trigger.user.chatId, detailedMessage);
+					}
+					else {
+						await TBOT.sendMessage(trigger.user.chatId, message);
+					}
 				}
 			} catch (error) {
 				console.error(`Error checking supplies for trigger ${trigger.id}:`, error);

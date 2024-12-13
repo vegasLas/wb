@@ -7,6 +7,7 @@ export interface SupplyTrigger {
   isActive: boolean
   checkPeriodStart: number  // start of range (0-14)
   checkInterval: number     // interval in minutes
+  maxCoefficient: number
   createdAt: Date
   updatedAt: Date
 }
@@ -17,6 +18,7 @@ export interface CreateTriggerRequest {
   isFree: boolean
   checkPeriodStart: number
   checkInterval: number
+  maxCoefficient: number
 }
 
 export interface UpdateTriggerRequest {
@@ -27,6 +29,7 @@ export interface UpdateTriggerRequest {
   isActive?: boolean
   checkPeriodStart?: number
   checkInterval?: number
+  maxCoefficient: number
 }
 
 export interface CreateTriggerResponse {
@@ -37,4 +40,5 @@ export interface CreateTriggerResponse {
   isActive?: boolean
   checkPeriodStart?: number
   checkInterval?: number
+  maxCoefficient: number
 }
