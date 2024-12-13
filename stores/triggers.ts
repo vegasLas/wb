@@ -17,6 +17,8 @@ export const useTriggerStore = defineStore('triggers', () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
   const deletingId = ref<string | null>(null)
+  const searchQuery = ref('')
+  const isCreating = ref(false)
   // getters
   const getTriggerById = computed(() => {
     return (triggerId: string) => triggers.value.find(t => t.id === triggerId)
@@ -25,9 +27,23 @@ export const useTriggerStore = defineStore('triggers', () => {
   const isLoading = computed(() => loading.value)
   const hasError = computed(() => error.value !== null)
 
+  const filteredTriggers = computed(() => {
+    if (!searchQuery.value) return triggers.value
+    
+    const query = searchQuery.value.toLowerCase()
+    const warehouseStore = useWarehouses()
+    return triggers.value.filter(trigger => 
+      trigger.warehouseIds.some(warehouseId => {
+        const name = warehouseStore.getWarehouseName(warehouseId)
+        return typeof name === 'string' && name.toLowerCase().includes(query)
+      })
+    )
+  })
+
   // actions
   async function createTrigger(data: CreateTriggerRequest) {
     try {
+      isCreating.value = true
       loading.value = true
       const trigger = await apiCreateTrigger(data)
       if (trigger) {
@@ -40,6 +56,7 @@ export const useTriggerStore = defineStore('triggers', () => {
       throw err
     } finally {
       loading.value = false
+      isCreating.value = false
     }
   }
 
@@ -123,6 +140,7 @@ export const useTriggerStore = defineStore('triggers', () => {
     loading,
     deletingId,
     error,
+    isCreating,
     // getters
     getTriggerById,
     isLoading,
@@ -133,5 +151,8 @@ export const useTriggerStore = defineStore('triggers', () => {
     fetchTriggers,
     deleteTrigger,
     toggleTrigger,
+    // add new returns
+    searchQuery,
+    filteredTriggers,
   }
 })

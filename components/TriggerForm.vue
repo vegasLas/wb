@@ -36,23 +36,15 @@
           />
         </UFormGroup>
 
-        <UFormGroup name="isFree">
-          <UCheckbox 
-            v-model="triggerFormStore.form.isFree" 
-            label="Бесплатная поставка"
-            color="blue"
-          />
-        </UFormGroup>
-
         <UFormGroup 
-          label="Интервал проверки" 
+          label="Через сколько после срабатывания триггера снова проверять склады" 
           name="checkInterval"
           required
         >
           <USelect
             v-model="triggerFormStore.form.checkInterval"
             :options="triggerFormStore.intervalOptions"
-            placeholder="Выберите интервал проверки"
+            placeholder="Интервал проверки"
           />
         </UFormGroup>
 
@@ -62,6 +54,7 @@
             label="Использовать отступ дней при проверке складов"
           />
         </UFormGroup>
+
         <UFormGroup 
           v-if="triggerFormStore.useCheckPeriod"
           label="Триггер будет учитывать отступ дней при проверке складов" 
@@ -76,11 +69,65 @@
             placeholder="Введите начало периода (0-14)"
           />
         </UFormGroup>
+        <UFormGroup name="isFree">
+          <UCheckbox 
+            v-model="triggerFormStore.form.isFree" 
+            label="Бесплатная поставка"
+            color="blue"
+            :disabled="triggerFormStore.useMaxCoefficient"
+            @update:model-value="(val) => {
+              if (val) {
+                console.log('val1', val)
+                triggerFormStore.useMaxCoefficient = false
+                triggerFormStore.form.maxCoefficient = 0
+              }
+            }"
+          />
+        </UFormGroup>
+        <UFormGroup name="useMaxCoefficient">
+          <UCheckbox 
+            v-model="triggerFormStore.useMaxCoefficient" 
+            label="Использовать максимальный коэффициент выгрузки"
+            :disabled="triggerFormStore.form.isFree"
+            @update:model-value="(val) => {
+              if (val) {
+                triggerFormStore.form.isFree = false
+                triggerFormStore.form.maxCoefficient = 1
+              } else {
+                console.log('val2', val)
+                triggerFormStore.form.maxCoefficient = 0
+              }
+            }"
+          />
+        </UFormGroup>
+
+        <UFormGroup 
+          v-if="triggerFormStore.useMaxCoefficient"
+          label="Максимальный коэффициент выгрузки" 
+          name="maxCoefficient"
+        >
+          <div class="flex items-center gap-4">
+            <URange
+              class="flex-1"
+              v-model="triggerFormStore.form.maxCoefficient"
+              :step="1"
+              :min="1"
+              :max="20"
+              :disabled="!triggerFormStore.useMaxCoefficient"
+            />
+            <div class="min-w-[4rem] text-center">
+              <UBadge size="lg" color="gray">
+                {{ triggerFormStore.form.maxCoefficient }}
+              </UBadge>
+            </div>
+          </div>
+        </UFormGroup>
       </UForm>
     </UCard>
   </div>
   <MainButton
     v-if="triggerFormStore.validate"
+    :disabled="triggerStore.isCreating"
     :loading="triggerStore.loading" 
     @click="triggerStore.createTrigger(triggerFormStore.form)" 
     text="Создать триггер" 

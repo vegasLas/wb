@@ -5,13 +5,15 @@ import type { CreateTriggerRequest } from '~/types/triggers'
 export const useTriggerFormStore = defineStore('triggerForm', () => {
   const warehouseStore = useWarehouses()
   const useCheckPeriod = ref(false)
+  const useMaxCoefficient = ref(false)
   
   const form = ref<CreateTriggerRequest>({
     warehouseIds: [],
     boxTypes: [],
     isFree: false,
     checkPeriodStart: 0,
-    checkInterval: 180
+    checkInterval: 180,
+    maxCoefficient: 0 
   })
 
   const boxTypeOptions = [
@@ -48,14 +50,11 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
         .array()
         .of(yup.string())
         .min(1, 'Выберите хотя бы один тип короба')
-        .required('Выберите хотя бы один тип короба'),
-      
-      isFree: yup.boolean(),
-      
+        .required('Выберите хоя бы один тип короба'),
       checkPeriodStart: yup
         .number()
         .transform(value => (isNaN(value) ? undefined : value))
-        .when('$useCheckPeriod', {
+        .when('useCheckPeriod', {
           is: true,
           then: (schema) => schema
             .required('Введите период проверки')
@@ -69,11 +68,31 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
         .required('Выберите интервал проверки')
         .min(30, 'Минимальный интервал 30 минут')
         .max(1440, 'Максимальный интервал 24 часа'),
+      
+      maxCoefficient: yup
+        .number()
+        .transform(value => (isNaN(value) ? undefined : value))
+        .when('useMaxCoefficient', {
+          is: true,
+          then: (schema) => schema
+            .required('Введите максимальный коэффициент')
+            .min(1, 'Минимальный коэффициент 1')
+            .max(20, 'Коэффициент не может быть больше 20'),
+          otherwise: (schema) => {
+            schema.transform(() => 0)
+            console.log('schema', schema)
+            return schema
+          },
+        })
+        .when('isFree', {
+          is: true,
+          then: (schema) => schema.transform(() => 0),
+        }),
     })
   })
-
   const validationContext = computed(() => ({
-    useCheckPeriod: useCheckPeriod.value
+    useCheckPeriod: useCheckPeriod.value,
+    useMaxCoefficient: useMaxCoefficient.value
   }))
 
   const validate = computed(() => {
@@ -95,11 +114,13 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
     form.value = {
       warehouseIds: [],
       boxTypes: [],
-      isFree: true,
+      isFree: false,
       checkPeriodStart: 0,
       checkInterval: 180,
+      maxCoefficient: 0
     }
     useCheckPeriod.value = false
+    useMaxCoefficient.value = false
   }
 
   async function initializeWarehouses() {
@@ -107,10 +128,10 @@ export const useTriggerFormStore = defineStore('triggerForm', () => {
       await warehouseStore.fetchWarehouses()
     }
   }
-
   return {
     form,
     useCheckPeriod,
+    useMaxCoefficient,
     boxTypeOptions,
     warehouseOptions,
     schema,

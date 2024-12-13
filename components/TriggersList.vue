@@ -1,6 +1,14 @@
 <template>
   <div class="space-y-4">
-    <UCard v-for="trigger in triggerStore.triggers" :key="trigger.id" class="p-4">
+    <UInput
+      v-model="triggerStore.searchQuery"
+      icon="i-heroicons-magnifying-glass"
+      placeholder="Поиск по названию склада..."
+      size="lg"
+      color="gray"
+    />
+
+    <UCard v-for="trigger in triggerStore.filteredTriggers" :key="trigger.id" class="p-4">
       <div class="flex justify-between items-start">
         <div class="space-y-2">
           <!-- Warehouses -->
@@ -51,6 +59,12 @@
             <span>{{ formatInterval(trigger.checkInterval) }}</span>
           </div>
 
+          <!-- Max Coefficient -->
+          <div v-if="trigger.maxCoefficient > 0">
+            <span class="font-medium">Макс. коэффициент: </span>
+            <span>{{ trigger.maxCoefficient }}</span>
+          </div>
+
           <!-- Created Date -->
           <div class="text-sm">
             Создан: {{ formatDate(trigger.createdAt) }}
@@ -77,8 +91,8 @@
       </div>
     </UCard>
 
-    <div v-if="triggerStore.triggers.length === 0" class="text-center py-8">
-      Триггеры не созданы
+    <div v-if="triggerStore.filteredTriggers.length === 0" class="text-center py-8">
+      {{ triggerStore.searchQuery ? 'Триггеры не найдены' : 'Триггеры не созданы' }}
     </div>
   </div>
 </template>

@@ -1,10 +1,11 @@
 export interface AcceptanceCoefficient {
   date: string
-  coefficient: number | null
+  coefficient: number
   warehouseID: number
   warehouseName: string
   boxTypeName: 'Короба' | 'Суперсейф' | 'Монопаллеты' | 'QR-поставка с коробами'
   boxTypeID?: 1 | 2 | 5 | 6
+  allowUnload: boolean
 }
 
 export interface Warehouse {
@@ -88,10 +89,3 @@ export interface TriggerError {
   message: string
   triggerId?: string
 }
-
-export interface AcceptanceCoefficient {
-  warehouseName: string;
-  warehouseId: number;
-  boxType: string;
-  value: number;
-} 
